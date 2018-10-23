@@ -7,6 +7,8 @@ namespace argo = ecosnail::argo;
 
 int main(int argc, char* argv[])
 {
+    // TODO: fix strings (' ++ ' string is read as just '++')
+
     auto message = argo::option<std::string>("-m", "--message")
         .required();
     auto times = argo::option<int>("-t", "--times")
