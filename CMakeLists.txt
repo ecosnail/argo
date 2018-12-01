@@ -1,14 +1,11 @@
 cmake_minimum_required (VERSION 3.8)
 
-if (NOT CMAKE_MODULE_PATH)
-    set (CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
-endif ()
+project (argo)
 
-include (project)
+set (CMAKE_CXX_STANDARD 17)
+set (CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
-ecosnail_project(
-    C++ 17
+add_library (argo INTERFACE)
+target_include_directories (argo INTERFACE include)
 
-    EXAMPLES
-        basic
-)
+add_subdirectory (examples)
