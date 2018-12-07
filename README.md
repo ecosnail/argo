@@ -3,7 +3,7 @@ This document, as the library itself, is under development. It probably does not
 argo
 ====
 
-**argo** is an experimental C++ library for parsing command line arguments. For a quick start, see the [canonical example](#example) of describing a simple command line interface. Also, consider the limitations that are [meant by design](#design-limitations), or [present in the current implementation](#current-limitations).
+**argo** is an experimental C++ library for parsing command line arguments. For a quick start, see the [canonical example](#example) of describing a simple command line interface. Also, consider the [limitations](#limitations): some are by design, some are meant to be fixed in the future.
 
 Contents
 --------
