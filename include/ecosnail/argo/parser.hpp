@@ -1,13 +1,16 @@
 #pragma once
 
 #include <ecosnail/argo/argument.hpp>
+#include <ecosnail/argo/errors.hpp>
 
+#include <iostream>
+#include <map>
+#include <memory>
+#include <set>
+#include <stdexcept>
+#include <string>
 #include <utility>
 #include <vector>
-#include <string>
-#include <map>
-#include <stdexcept>
-#include <memory>
 
 namespace ecosnail::argo {
 
@@ -29,9 +32,16 @@ public:
     }
 
     template <class Args = std::initializer_list<std::string_view>>
-    void parse(const Args& args)
+    bool parse(std::string_view programName, const Args& args)
     {
+        bool helpRequested = false;
+
         for (auto arg = args.begin(); arg != args.end(); ++arg) {
+            if (_helpKeys.count(*arg)) {
+                helpRequested = true;
+                continue;
+            }
+
             if (auto it = _mapping.find(*arg); it != _mapping.end()) {
                 auto& data = _arguments.at(it->second);
 
@@ -45,6 +55,11 @@ public:
                     data->provide(*arg);
                 }
             }
+        }
+
+        if (helpRequested) {
+            printHelp(programName);
+            return false;
         }
 
         // After-parse checks
@@ -67,24 +82,28 @@ public:
         if (!problemsString.empty()) {
             throw Exception(problemsString);
         }
+
+        return !helpRequested;
     }
 
-    void parse(int argc, char* argv[])
+    bool parse(int argc, char* argv[]);
+
+    template <class... Keys>
+    void helpOption(Keys&&... keys)
     {
-        std::vector<std::string_view> args;
-        for (int i = 1; i < argc; i++) {
-            args.push_back(argv[i]);
-        }
-        parse(args);
+        (_helpKeys.insert(keys), ...);
     }
 
 private:
+    void printHelp(std::string_view programName) const;
+
     std::vector<std::shared_ptr<ArgumentData>> _arguments;
     std::map<std::string, size_t, std::less<>> _mapping;
     std::vector<std::string> _freeArgs;
+    std::set<std::string, std::less<>> _helpKeys;
 };
 
-Parser globalParser;
+extern Parser globalParser;
 
 template <class Type, class... Flags>
 Argument<Type> option(Flags&&... flags)
@@ -93,14 +112,17 @@ Argument<Type> option(Flags&&... flags)
 }
 
 template <class Args = std::initializer_list<std::string_view>>
-void parse(const Args& args)
+bool parse(const Args& args)
 {
-    globalParser.parse(args);
+    return globalParser.parse(args);
 }
 
-void parse(int argc, char* argv[])
+bool parse(int argc, char* argv[]);
+
+template <class... Keys>
+void helpOption(Keys&&... keys)
 {
-    globalParser.parse(argc, argv);
+    globalParser.helpOption(std::forward<Keys>(keys)...);
 }
 
 } // namespace ecosnail::argo
