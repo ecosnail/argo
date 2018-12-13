@@ -17,7 +17,7 @@ int main(int argc, char* argv[])
         .help("number of times to print the message");
     auto offset = argo::option<int>("--offset")
         .help("size of fancy offset");
-    auto decoration = argo::option<std::string>("-d", "--decoration")
+    auto decoration = argo::option("-d", "--decoration")
         .defaultValue("***")
         .help("characters to decorate text with");
 
