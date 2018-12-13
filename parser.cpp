@@ -7,8 +7,6 @@
 
 namespace ecosnail::argo {
 
-Parser globalParser;
-
 bool Parser::parse(int argc, char* argv[])
 {
     if (argc > 0) {
@@ -23,10 +21,20 @@ bool Parser::parse(int argc, char* argv[])
     return parse(args);
 }
 
-// TODO: check help keys do not overlap with others
-// TODO: check all args either have flags or expect an argument
-// TODO: warn about multiple multi args with no flags
-// TODO: implement '=' notation
+void Parser::programName(std::string name)
+{
+    _programName = std::move(name);
+}
+
+void Parser::output(std::ostream& outputStream)
+{
+    _output = &outputStream;
+}
+
+void Parser::message(Message id, std::string text)
+{
+    _messageTexts.update(id, std::move(text));
+}
 
 void Parser::preParseCheck()
 {
@@ -56,7 +64,8 @@ bool Parser::parse(const std::vector<std::string_view>& args)
             if (data->takesArgument) {
                 ++arg;
                 if (arg == args.end()) {
-                    *_output << "no value for argument" << std::endl;
+                    *_output << message(Message::NoValueForArgument) <<
+                        std::endl;
                     break;
                 }
                 data->provide(*arg);
@@ -90,7 +99,7 @@ void Parser::postParseCheck()
 {
     for (const auto& data : _arguments) {
         if (data->required && data->timesUsed == 0) {
-            *_output << "required argument not used: ";
+            *_output << message(Message::RequiredArgumentNotUsed) << ": ";
             if (auto it = data->flags.begin(); it != data->flags.end()) {
                 *_output << *it++;
                 for (; it != data->flags.end(); ++it) {
@@ -102,9 +111,15 @@ void Parser::postParseCheck()
 
         if (!data->multi && data->timesUsed > 1) {
             assert(!data->flags.empty());
-            *_output << "a non-multi argument used multiple times";
+            *_output << message(Message::NonMultiUsedMultipleTimes) <<
+                std::endl;
         }
     }
+}
+
+const std::string& Parser::message(Message id) const
+{
+    return _messageTexts[id];
 }
 
 void Parser::printHelp() const
@@ -144,11 +159,6 @@ void Parser::printHelp() const
     }
 
     std::cout.flush();
-}
-
-bool parse(int argc, char* argv[])
-{
-    return globalParser.parse(argc, argv);
 }
 
 } // namespace ecosnail::argo

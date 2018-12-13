@@ -1,6 +1,8 @@
 #pragma once
 
 #include <ecosnail/argo/argument.hpp>
+#include <ecosnail/argo/messages.hpp>
+#include <ecosnail/argo/shared_data.hpp>
 
 #include <iostream>
 #include <map>
@@ -14,12 +16,8 @@
 
 namespace ecosnail::argo {
 
-// TODO: check default value not present for required arguments
-
 class Parser {
 public:
-    // TODO: all flags can be converted to strings?
-    // TODO: at least one flag present?
     template <class Type = std::string, class... Flags>
     Argument<Type> option(Flags&&... flags)
     {
@@ -40,28 +38,25 @@ public:
         (_helpKeys.insert(keys), ...);
     }
 
-    void programName(std::string name)
-    {
-        _programName = std::move(name);
-    }
-
-    void output(std::ostream& outputStream)
-    {
-        _output = &outputStream;
-    }
+    void programName(std::string name);
+    void output(std::ostream& outputStream);
+    void message(Message id, std::string text);
 
 private:
     bool parse(const std::vector<std::string_view>& args);
     void printHelp() const;
     void preParseCheck();
     void postParseCheck();
+    const std::string& message(Message id) const;
 
     template <class Type>
     Argument<Type> option(const std::vector<std::string_view>& flags)
     {
-        // TODO: different mappings do not overlap?
-
         for (const auto& flag : flags) {
+            if (_argsByFlag.count(flag)) {
+                *_output << message(Message::OptionFlagOverlaps) << ": " <<
+                    flag << std::endl;
+            }
             _argsByFlag[std::string(flag)] = _arguments.size();
         }
         auto data = std::make_shared<TypedArgumentData<Type>>();
@@ -80,28 +75,7 @@ private:
     std::map<std::string, size_t, std::less<>> _argsByFlag;
     std::vector<std::string> _freeArgs;
     std::set<std::string, std::less<>> _helpKeys;
+    MessageTexts _messageTexts;
 };
-
-extern Parser globalParser;
-
-template <class Type = std::string, class... Flags>
-Argument<Type> option(Flags&&... flags)
-{
-    return globalParser.option<Type>(std::forward<Flags>(flags)...);
-}
-
-template <class Args = std::initializer_list<std::string_view>>
-bool parse(const Args& args)
-{
-    return globalParser.parse(args);
-}
-
-bool parse(int argc, char* argv[]);
-
-template <class... Keys>
-void helpOption(Keys&&... keys)
-{
-    globalParser.helpOption(std::forward<Keys>(keys)...);
-}
 
 } // namespace ecosnail::argo

@@ -12,8 +12,6 @@
 
 namespace ecosnail::argo {
 
-// TODO: more informative error messages
-
 template <class T>
 class Argument {
     using Values = std::vector<T>;
@@ -28,7 +26,6 @@ public:
         // TODO: think about this assert
         assert(!_data->multi);
 
-        // TODO: check default-constructible somewhere?
         if (!_data->values.empty()) {
             return _data->values.front();
         }
@@ -59,8 +56,6 @@ public:
         _data->required = true;
         return *this;
     }
-
-    // TODO: check default-constructible or required?
 
     Argument defaultValue(T value)
     {
