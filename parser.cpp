@@ -36,7 +36,7 @@ void Parser::message(Message id, std::string text)
     _messageTexts.update(id, std::move(text));
 }
 
-void Parser::preParseCheck()
+bool Parser::preParseCheck()
 {
 }
 

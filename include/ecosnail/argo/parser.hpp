@@ -45,7 +45,7 @@ public:
 private:
     bool parse(const std::vector<std::string_view>& args);
     void printHelp() const;
-    void preParseCheck();
+    bool preParseCheck();
     void postParseCheck();
     const std::string& message(Message id) const;
 
@@ -54,7 +54,7 @@ private:
     {
         for (const auto& flag : flags) {
             if (_argsByFlag.count(flag)) {
-                *_output << message(Message::OptionFlagOverlaps) << ": " <<
+                *_output << message(Message::OptionFlagsOverlap) << ": " <<
                     flag << std::endl;
             }
             _argsByFlag[std::string(flag)] = _arguments.size();

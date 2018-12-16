@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cassert>
 #include <optional>
 #include <sstream>
 #include <vector>
@@ -40,6 +41,11 @@ struct TypedArgumentData : ArgumentData {
 };
 
 template <>
-struct TypedArgumentData<void> : ArgumentData {};
+struct TypedArgumentData<void> : ArgumentData {
+    void provide(std::string_view) override
+    {
+        assert(false);
+    }
+};
 
 } // namespace::argo
