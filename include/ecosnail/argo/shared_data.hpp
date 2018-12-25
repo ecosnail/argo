@@ -1,14 +1,14 @@
 #pragma once
 
 #include <cassert>
-#include <optional>
 #include <sstream>
 #include <vector>
+#include <memory>
 
 namespace ecosnail::argo {
 
 template <class T>
-T cast(std::string_view text)
+T cast(const std::string& text)
 {
     std::stringstream stream;
     stream << text;
@@ -19,7 +19,7 @@ T cast(std::string_view text)
 
 struct ArgumentData {
     // TODO: implement proper constructor? check state before virtual functions?
-    virtual void provide(std::string_view value) = 0;
+    virtual void provide(const std::string& value) = 0;
 
     std::vector<std::string> flags;
     bool multi = false;
@@ -31,18 +31,18 @@ struct ArgumentData {
 
 template <class T = void>
 struct TypedArgumentData : ArgumentData {
-    void provide(std::string_view value) override
+    void provide(const std::string& value) override
     {
         values.push_back(cast<T>(value));
     }
 
     std::vector<T> values;
-    std::optional<T> defaultValue;
+    std::unique_ptr<T> defaultValue;
 };
 
 template <>
 struct TypedArgumentData<void> : ArgumentData {
-    void provide(std::string_view) override
+    void provide(const std::string&) override
     {
         assert(false);
     }

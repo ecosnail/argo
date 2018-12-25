@@ -13,7 +13,7 @@ bool Parser::parse(int argc, char* argv[])
         programName(argv[0]);
     }
 
-    std::vector<std::string_view> args;
+    std::vector<std::string> args;
     for (int i = 1; i < argc; i++) {
         args.push_back(argv[i]);
     }
@@ -36,11 +36,11 @@ void Parser::message(Message id, std::string text)
     _messageTexts.update(id, std::move(text));
 }
 
-bool Parser::preParseCheck()
+void Parser::preParseCheck()
 {
 }
 
-bool Parser::parse(const std::vector<std::string_view>& args)
+bool Parser::parse(const std::vector<std::string>& args)
 {
     preParseCheck();
 
@@ -57,7 +57,8 @@ bool Parser::parse(const std::vector<std::string_view>& args)
             continue;
         }
 
-        if (auto it = _argsByFlag.find(*arg); it != _argsByFlag.end()) {
+        auto it = _argsByFlag.find(*arg);
+        if (it != _argsByFlag.end()) {
             auto& data = _arguments.at(it->second);
             data->timesUsed++;
 
@@ -80,7 +81,7 @@ bool Parser::parse(const std::vector<std::string_view>& args)
                     }
                 }
             } else {
-                _freeArgs.push_back(std::string(*arg));
+                _freeArgs.push_back(*arg);
             }
         }
     }
@@ -100,7 +101,7 @@ void Parser::postParseCheck()
     for (const auto& data : _arguments) {
         if (data->required && data->timesUsed == 0) {
             *_output << message(Message::RequiredArgumentNotUsed) << ": ";
-            if (auto it = data->flags.begin(); it != data->flags.end()) {
+            for (auto it = data->flags.begin(); it != data->flags.end(); ) {
                 *_output << *it++;
                 for (; it != data->flags.end(); ++it) {
                     *_output << ", " << *it;
@@ -122,6 +123,13 @@ const std::string& Parser::message(Message id) const
     return _messageTexts[id];
 }
 
+void Parser::helpOption(const std::vector<std::string>& flags)
+{
+    for (const auto& flag : flags) {
+        _helpKeys.insert(flag);
+    }
+}
+
 void Parser::printHelp() const
 {
     struct ArgumentInfo {
@@ -134,7 +142,7 @@ void Parser::printHelp() const
     for (const auto& argument : _arguments) {
         std::ostringstream keyStream;
         const auto& flags = argument->flags;
-        if (auto it = flags.begin(); it != flags.end()) {
+        for (auto it = flags.begin(); it != flags.end(); ) {
             keyStream << *it++;
             for (; it != flags.end(); ++it) {
                 keyStream << ", " << *it;

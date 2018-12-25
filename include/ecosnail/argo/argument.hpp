@@ -6,9 +6,9 @@
 #include <cassert>
 #include <iterator>
 #include <memory>
-#include <vector>
 #include <sstream>
-#include <optional>
+#include <string>
+#include <vector>
 
 namespace ecosnail::argo {
 
@@ -35,19 +35,19 @@ public:
         return T{};
     }
 
-    auto begin() const
+    ArgumentIterator<T> begin() const
     {
-        return ArgumentIterator<T>(_data->values.begin());
+        return ArgumentIterator<T>{_data->values.begin()};
     }
 
-    auto end() const
+    ArgumentIterator<T> end() const
     {
-        return ArgumentIterator<T>(_data->values.end());
+        return ArgumentIterator<T>{_data->values.end()};
     }
 
-    Argument help(std::string_view helpText)
+    Argument help(std::string helpText)
     {
-        _data->helpText = helpText;
+        _data->helpText = std::move(helpText);
         return *this;
     }
 
@@ -59,7 +59,7 @@ public:
 
     Argument defaultValue(T value)
     {
-        _data->defaultValue = value;
+        _data->defaultValue.reset(new T{value});
         return *this;
     }
 
@@ -79,7 +79,7 @@ public:
         std::ostream& output, const Argument& argument)
     {
         if (argument._data->multi) {
-            if (auto it = argument.begin(); it != argument.end()) {
+            for (auto it = argument.begin(); it != argument.end(); ) {
                 output << *it++;
                 for (; it != argument.end(); ++it) {
                     output << ", " << *it;

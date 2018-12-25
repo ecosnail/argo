@@ -14,7 +14,7 @@ Argument<Type> option(Flags&&... flags)
 
 bool parse(int argc, char* argv[]);
 
-template <class Args = std::initializer_list<std::string_view>>
+template <class Args = std::initializer_list<std::string>>
 bool parse(const Args& args)
 {
     return globalParser.parse(args);

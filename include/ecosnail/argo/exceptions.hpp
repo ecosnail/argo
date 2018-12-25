@@ -4,7 +4,6 @@
 #include <ostream>
 #include <sstream>
 #include <string>
-#include <string_view>
 #include <vector>
 
 namespace ecosnail::argo {
@@ -17,7 +16,7 @@ class FlagException : public Exception {
 public:
     FlagException(
         const std::string& message, const std::vector<std::string>& flags);
-    FlagException(const std::string& message, std::string_view flag);
+    FlagException(const std::string& message, const std::string& flag);
 
     const char* what() const noexcept override;
 
@@ -29,7 +28,7 @@ class FlagDoesNotHaveKeys : public Exception {};
 
 class FlagDuplicated : public FlagException {
 public:
-    FlagDuplicated(std::string_view flag);
+    FlagDuplicated(const std::string& flag);
 };
 
 class ArgumentsAfterMultiArgument : public Exception {};

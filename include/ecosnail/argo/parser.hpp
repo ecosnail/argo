@@ -36,7 +36,7 @@ public:
     template <class... Keys>
     void helpOption(Keys&&... keys)
     {
-        (_helpKeys.insert(keys), ...);
+        helpOption({std::forward<Keys>(keys)...});
     }
 
     void programName(std::string name);
@@ -44,26 +44,27 @@ public:
     void message(Message id, std::string text);
 
 private:
-    bool parse(const std::vector<std::string_view>& args);
+    bool parse(const std::vector<std::string>& args);
+    void helpOption(const std::vector<std::string>& flags);
     void printHelp() const;
-    bool preParseCheck();
+    void preParseCheck();
     void postParseCheck();
     const std::string& message(Message id) const;
 
     template <class Type>
-    Argument<Type> option(const std::vector<std::string_view>& flags)
+    Argument<Type> option(const std::vector<std::string>& flags)
     {
         for (const auto& flag : flags) {
             if (_argsByFlag.count(flag) || _helpKeys.count(flag)) {
                 throw exception::FlagDuplicated(flag);
             }
-            _argsByFlag[std::string(flag)] = _arguments.size();
+            _argsByFlag[flag] = _arguments.size();
         }
         auto data = std::make_shared<TypedArgumentData<Type>>();
         _arguments.push_back(data);
 
         for (const auto& flag : flags) {
-            data->flags.push_back(std::string(flag));
+            data->flags.push_back(flag);
         }
 
         return Argument<Type>(data);
@@ -72,9 +73,9 @@ private:
     std::string _programName = "<program>";
     std::ostream* _output = &std::cout;
     std::vector<std::shared_ptr<ArgumentData>> _arguments;
-    std::map<std::string, size_t, std::less<>> _argsByFlag;
+    std::map<std::string, size_t> _argsByFlag;
     std::vector<std::string> _freeArgs;
-    std::set<std::string, std::less<>> _helpKeys;
+    std::set<std::string> _helpKeys;
     MessageTexts _messageTexts;
 };
 
