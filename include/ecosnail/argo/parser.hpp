@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ecosnail/argo/argument.hpp>
+#include <ecosnail/argo/exceptions.hpp>
 #include <ecosnail/argo/messages.hpp>
 #include <ecosnail/argo/shared_data.hpp>
 
@@ -53,9 +54,8 @@ private:
     Argument<Type> option(const std::vector<std::string_view>& flags)
     {
         for (const auto& flag : flags) {
-            if (_argsByFlag.count(flag)) {
-                *_output << message(Message::OptionFlagsOverlap) << ": " <<
-                    flag << std::endl;
+            if (_argsByFlag.count(flag) || _helpKeys.count(flag)) {
+                throw exception::FlagDuplicated(flag);
             }
             _argsByFlag[std::string(flag)] = _arguments.size();
         }

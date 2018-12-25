@@ -4,9 +4,11 @@
 #include <ecosnail/argo.hpp>
 
 namespace argo = ecosnail::argo;
+namespace ex = argo::exception;
 
 // TODO:
 // * Implement '=' notation
+// * Implement '-abc' notation
 // * Maybe use 'argument' instead of 'option' for options without flags
 //
 // Static checks:
@@ -19,51 +21,39 @@ TEST_CASE("Command line description mistakes", "[checks]")
 
     SECTION("an option flag is duplicated")
     {
-        argo::message(argo::Message::OptionFlagDuplicated, "duplicated");
-        argo::option("-x", "-x");
-        REQUIRE(output.str() == "duplicated: -x\n");
+        REQUIRE_THROWS_AS(argo::option("-x", "-x"), ex::FlagDuplicated);
     }
 
-    SECTION("option flags overlap")
-    {
-        argo::message(argo::Message::OptionFlagsOverlap, "overlap");
-        argo::option("-x");
-        argo::option("-x");
-        REQUIRE(output.str() == "overlap: -x\n");
-    }
+    //SECTION("option flags overlap")
+    //{
+    //    argo::option("-x");
+    //    REQUIRE_THROWS_AS(argo::option("-x"), ex::FlagDuplicated);
+    //}
 
-    SECTION("help option overlaps with previously set option")
-    {
-        argo::message(argo::Message::OptionFlagOverlapsHelp, "overlaps help");
-        argo::helpOption("-h");
-        argo::option("-h");
-        REQUIRE(output.str() == "overlaps help: -h\n");
-    }
+    //SECTION("help option overlaps with previously set option")
+    //{
+    //    argo::helpOption("-h");
+    //    REQUIRE_THROWS_AS(argo::option("-h"), ex::FlagDuplicated);
+    //}
 
-    SECTION("option overlaps with previously set help option")
-    {
-        argo::message(argo::Message::OptionFlagOverlapsHelp, "overlaps help");
-        argo::option("-h");
-        argo::helpOption("-h");
-        REQUIRE(output.str() == "overlaps help: -h\n");
-    }
+    //SECTION("option overlaps with previously set help option")
+    //{
+    //    argo::option("-h");
+    //    REQUIRE_THROWS_AS(argo::helpOption("-h"), ex::FlagDuplicated);
+    //}
 
-    SECTION("flag must have keys")
-    {
-        argo::message(argo::Message::FlagDoesNotHaveKeys, "no keys");
-        argo::option().flag();
-        argo::parse({});
-        REQUIRE(output.str() == "no keys\n");
-    }
+    //SECTION("flag options must have keys at parse time")
+    //{
+    //    argo::option().flag();
+    //    REQUIRE_THROWS_AS(argo::parse({}), ex::FlagDoesNotHaveKeys);
+    //}
 
-    SECTION("warn about no-key arguments after a multi argument")
-    {
-        argo::message(argo::Message::MultiArgumentNotLast, "not last");
-        argo::option().multi();
-        argo::option();
-        argo::parse({});
-        REQUIRE(output.str() == "not last\n");
-    }
+    //SECTION("no argument allowed after a multi argument")
+    //{
+    //    argo::option().multi();
+    //    argo::option();
+    //    REQUIRE_THROWS_AS(argo::parse({}), ex::ArgumentsAfterMultiArgument);
+    //}
 
     //SECTION("required values have default value or are default-constructible")
     //{
@@ -78,13 +68,11 @@ TEST_CASE("Command line description mistakes", "[checks]")
     //    REQUIRE(output.str() == "not constructible: -x\n");
     //}
 
-    SECTION("subsequent parse calls")
-    {
-        argo::message(argo::Message::SubsequentParseCall, "subsequent");
-        argo::parse({});
-        argo::parse({});
-        REQUIRE(output.str() == "subsequent\n");
-    }
+    //SECTION("subsequent parse calls")
+    //{
+    //    argo::parse({});
+    //    REQUIRE_THROWS_AS(argo::parse({}), ex::SubsequentParseCall);
+    //}
 
     //SECTION("all option flags can be converted to strings")
     //{
@@ -98,13 +86,13 @@ TEST_CASE("Command line description mistakes", "[checks]")
 
     // Command line errors
 
-    SECTION("non-multi argument used multiple times")
-    {
-        argo::message(argo::Message::NonMultiUsedMultipleTimes, "non multi");
-        argo::option("-x").flag();
-        bool success = argo::parse({"-x", "-x"});
-        REQUIRE(output.str() == "non multi: -x\n");
-        REQUIRE(!success);
-    }
+    //SECTION("non-multi argument used multiple times")
+    //{
+    //    argo::message(argo::Message::NonMultiUsedMultipleTimes, "non multi");
+    //    argo::option("-x").flag();
+    //    bool success = argo::parse({"-x", "-x"});
+    //    REQUIRE(output.str() == "non multi: -x\n");
+    //    REQUIRE(!success);
+    //}
 }
 
