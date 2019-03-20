@@ -49,7 +49,7 @@ private:
     void printHelp() const;
     void preParseCheck();
     void postParseCheck();
-    const std::string& message(Message id) const;
+    const std::string& message(Message id);
 
     template <class Type>
     Argument<Type> option(const std::vector<std::string>& flags)
@@ -77,6 +77,7 @@ private:
     std::vector<std::string> _freeArgs;
     std::set<std::string> _helpKeys;
     MessageTexts _messageTexts;
+    bool _messagesWritten = false;
 };
 
 } // namespace ecosnail::argo

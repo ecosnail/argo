@@ -93,7 +93,7 @@ bool Parser::parse(const std::vector<std::string>& args)
 
     postParseCheck();
 
-    return !helpRequested;
+    return !_messagesWritten;
 }
 
 void Parser::postParseCheck()
@@ -118,8 +118,9 @@ void Parser::postParseCheck()
     }
 }
 
-const std::string& Parser::message(Message id) const
+const std::string& Parser::message(Message id)
 {
+    _messagesWritten = true;
     return _messageTexts[id];
 }
 
