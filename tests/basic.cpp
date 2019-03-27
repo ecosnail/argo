@@ -10,6 +10,9 @@ namespace ex = argo::exception;
 // * Implement '=' notation
 // * Implement '-abc' notation
 // * Maybe use 'argument' instead of 'option' for options without flags
+// * Check option values with spaces (they are likely read with streams)
+// * Check for bad values (the string provided as a value cannot be converted to
+//   the option type)
 //
 // Static checks:
 // * Option type is convertible to/from text ('cast' can be called)

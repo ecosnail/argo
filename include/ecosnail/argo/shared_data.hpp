@@ -1,21 +1,35 @@
 #pragma once
 
 #include <cassert>
-#include <sstream>
-#include <vector>
 #include <memory>
+#include <sstream>
+#include <type_traits>
+#include <vector>
 
 namespace ecosnail::argo {
 
+template <class T, class = void>
+struct Cast {
+    T operator()(const std::string& text)
+    {
+        std::istringstream stream(text);
+        T value;
+        stream >> value;
+        return value;
+    }
+};
+
 template <class T>
-T cast(const std::string& text)
-{
-    std::stringstream stream;
-    stream << text;
-    T value;
-    stream >> value;
-    return value;
-}
+struct Cast<
+        T,
+        typename std::enable_if<
+            std::is_convertible<std::string, T>::value
+        >::type>  {
+    T operator()(const std::string& text)
+    {
+        return text;
+    }
+};
 
 struct ArgumentData {
     // TODO: implement proper constructor? check state before virtual functions?
@@ -33,7 +47,7 @@ template <class T = void>
 struct TypedArgumentData : ArgumentData {
     void provide(const std::string& value) override
     {
-        values.push_back(cast<T>(value));
+        values.push_back(Cast<T>{}(value));
     }
 
     std::vector<T> values;
