@@ -35,6 +35,16 @@ public:
         return T{};
     }
 
+    const T& operator*() const
+    {
+        assert(!_data->multi);
+        if (!_data->values.empty()) {
+            return _data->values.front();
+        }
+        assert(_data->defaultValue);
+        return *_data->defaultValue;
+    }
+
     ArgumentIterator<T> begin() const
     {
         return ArgumentIterator<T>{_data->values.begin()};
